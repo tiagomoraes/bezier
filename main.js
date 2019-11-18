@@ -15,20 +15,20 @@ function setup() {
 
 function draw() {
   // call drawing functions here
-  let bc = new BezierCurve([
-    {x: 40, y:40},
-    {x: 100, y:500},
-    {x:200, y:500},
-    {x:260, y:40}
-  ])
+  let points = [{x: 40, y:40},
+                {x: 100, y:500},
+                {x:200, y:500},
+                {x:260, y:40}];
+  let bc = new BezierCurve(points)
   bc.display();
 }
 
 // ================ CLASSES OBJECTS ================
 
 class BezierCurve {
-  constructor(controlPoints) {
+  constructor(controlPoints, howManyPoints = 100) {
     this.controlPoints = controlPoints;
+    this.curvePoints = this.computePoints(howManyPoints);
     this.showControlPoints = true;
     this.showControlPolygonal = true;
     this.showCurves = true;
@@ -55,9 +55,8 @@ class BezierCurve {
     if(this.showCurves) {
       stroke('black');
       strokeWeight(1);
-      let points = this.computePoints(100);
-      for(let i = 1; i < points.length; i++) {
-        line(points[i].x, points[i].y, points[i-1].x, points[i-1].y);
+      for(let i = 1; i < this.curvePoints.length; i++) {
+        line(this.curvePoints[i].x, this.curvePoints[i].y, this.curvePoints[i-1].x, this.curvePoints[i-1].y);
       }
     }
   }
