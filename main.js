@@ -16,9 +16,10 @@ function setup() {
 function draw() {
   // call drawing functions here
   let bc = new BezierCurve([
-    {x: 10, y:20},
-    {x: 120, y:100},
-    {x:640, y:200}
+    {x: 40, y:40},
+    {x: 100, y:100},
+    {x:200, y:100},
+    {x:260, y:40}
   ])
   bc.display();
 }
@@ -32,8 +33,38 @@ class BezierCurve {
 
   // custom functions of the class here
   display() {
-    for(let i = 1; i < this.controlPoints.length; i++) {
-      line(this.controlPoints[i].x, this.controlPoints[i].y, this.controlPoints[i-1].x, this.controlPoints[i-1].y);
+    let points = this.computePoints(100);
+    for(let i = 1; i < points.length; i++) {
+      line(points[i].x, points[i].y, points[i-1].x, points[i-1].y);
     }
+  }
+
+  deCastejau(points, t) {
+    if (points.length > 1) {
+      let nextPoints = [];
+      for(let i = 0; i < points.length-1; i++) {
+        nextPoints.push({
+          x: (1-t)*points[i].x + t*points[i+1].x,
+          y: (1-t)*points[i].y + t*points[i+1].y
+        });
+      }
+      return this.deCastejau(nextPoints, t);
+    } else {
+      return points[0];
+    }
+  }
+
+  computePoints(howManyPoints) {
+    howManyPoints--;
+    let points = [];
+    let delta = 1.0/howManyPoints;
+    let t = delta;
+    points.push(this.controlPoints[0]);
+    for(let i = 1; i < howManyPoints; i++) {
+      points.push(this.deCastejau(this.controlPoints, t));
+      t += delta;
+    }
+    points.push(this.controlPoints[this.controlPoints.length-1]);
+    return points;
   }
 }
