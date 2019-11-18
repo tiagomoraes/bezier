@@ -19,7 +19,10 @@ function draw() {
                 {x: 100, y:500},
                 {x:200, y:500},
                 {x:260, y:40}];
-  let bc = new BezierCurve(points)
+  let bc = new BezierCurve(points);
+  bc.setHowManyPoits(8);
+  bc.setCurve();
+  bc.setPolygonalFlag(true);
   bc.display();
 }
 
@@ -28,14 +31,16 @@ function draw() {
 class BezierCurve {
   constructor(controlPoints, howManyPoints = 100) {
     this.controlPoints = controlPoints;
-    this.curvePoints = this.computePoints(howManyPoints);
+    this.howManyPoints = howManyPoints
+    this.curvePoints = this.computePoints(this.howManyPoints);
     this.showControlPoints = true;
-    this.showControlPolygonal = true;
+    this.showControlPolygonal = false;
     this.showCurves = true;
   }
 
   // custom functions of the class here
   display() {
+    
     if(this.showControlPoints) {
       stroke('green');
       strokeWeight(10);
@@ -84,9 +89,29 @@ class BezierCurve {
     points.push(this.controlPoints[0]);
     for(let i = 1; i < howManyPoints; i++) {
       points.push(this.deCastejau(this.controlPoints, t));
-      t += delta;
+      t += delta; 
     }
     points.push(this.controlPoints[this.controlPoints.length-1]);
     return points;
+  }
+
+  setCurveFlag(value) {
+    this.showCurves = value;
+  }
+
+  setPointsFlag(value) {
+    this.showControlPoints = value;
+  }
+
+  setPolygonalFlag(value) {
+    this.showControlPolygonal = value;
+  }
+
+  setHowManyPoits(value) {
+    this.howManyPoints = value;
+  }
+
+  setCurve() {
+    this.curvePoints = this.computePoints(this.howManyPoints);
   }
 }
