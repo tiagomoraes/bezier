@@ -4,7 +4,7 @@ const AUTHORS = 'Tiago Moraes & Vinícius Dantas';
 
 // ================ GENERAL FUNCTIONS ================
 
-function paintCurve(points) {
+function createCurve(points) {
   for(let i = 1; i < points.length; i++) {
     line(points[i].x, points[i].y, points[i-1].x, points[i-1].y);
   }
