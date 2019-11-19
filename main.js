@@ -1,6 +1,7 @@
 // ================ CONSTANTS ================
 
 const AUTHORS = "Tiago Moraes & Vinícius Dantas";
+const dotsize = 10; // ver algum valor bom
 
 // ================ GENERAL FUNCTIONS ================
 
@@ -15,15 +16,20 @@ function setup() {
 
 function draw() {
   // call drawing functions here
-  let points = [{x: 40, y:40},
+  let points = [{x: 200, y:200},
                 {x: 100, y:500},
                 {x:200, y:500},
                 {x:260, y:40}];
   let bc = new BezierCurve(points);
-  bc.setHowManyPoits(8);
-  bc.setCurve();
   bc.setPolygonalFlag(true);
+  bc.addPoint(2, 500,400);
+  bc.addPoint(2, 2,2);
+  bc.updatePoint(3, 800, 800);
+  bc.removePoint(bc.insideControlPoint(4, 4));
+  bc.updatePoint(3, 1000, 500 );
+  bc.setCurve();
   bc.display();
+  //console.log(bc.insideControlPoint(1000, 1000));
 }
 
 // ================ CLASSES OBJECTS ================
@@ -43,7 +49,7 @@ class BezierCurve {
     
     if(this.showControlPoints) {
       stroke('green');
-      strokeWeight(10);
+      strokeWeight(dotsize);
       for(let i = 0; i < this.controlPoints.length; i++) { 
         point(this.controlPoints[i].x, this.controlPoints[i].y);
       }
@@ -113,5 +119,28 @@ class BezierCurve {
 
   setCurve() {
     this.curvePoints = this.computePoints(this.howManyPoints);
+  }
+
+  insideControlPoint(x, y) {
+    for(let i = 0; i < this.controlPoints.length; i++) {
+      let px = this.controlPoints[i].x, py = this.controlPoints[i].y;
+      let dist = sqrt((px - x)*(px - x) + (py - y)*(py - y));
+      if (dist <= dotsize) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  addPoint(pos, x, y) {
+    this.controlPoints.splice(pos, 0, {x: x, y: y});
+  }
+
+  updatePoint(pos, x, y) {
+    this.controlPoints[pos] = {x: x, y: y};
+  }
+
+  removePoint(pos) {
+    this.controlPoints.splice(pos, 1);
   }
 }
