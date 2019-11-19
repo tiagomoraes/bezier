@@ -1,7 +1,7 @@
 // ================ CONSTANTS ================
 
 const AUTHORS = "Tiago Moraes & Vinícius Dantas";
-const dotsize = 10; // ver algum valor bom
+const DOT_SIZE = 10; // ver algum valor bom
 
 // ================ GENERAL FUNCTIONS ================
 
@@ -19,7 +19,7 @@ function draw() {
   let points = [{x: 200, y:200},
                 {x: 100, y:500},
                 {x:200, y:500},
-                {x:260, y:40}];
+                {x:260, y:800}];
   let bc = new BezierCurve(points);
   bc.setPolygonalFlag(true);
   bc.addPoint(2, 500,400);
@@ -29,7 +29,15 @@ function draw() {
   bc.updatePoint(3, 1000, 500 );
   bc.setCurve();
   bc.display();
+
   //console.log(bc.insideControlPoint(1000, 1000));
+}
+
+function mousePressed(e) {
+  let index = bc.insideControlPoint(e.clientX, e.clientY);
+  if(index) {
+    bc.updatePoint(index, 100, 200);
+  }
 }
 
 // ================ CLASSES OBJECTS ================
@@ -49,7 +57,7 @@ class BezierCurve {
     
     if(this.showControlPoints) {
       stroke('green');
-      strokeWeight(dotsize);
+      strokeWeight(DOT_SIZE);
       for(let i = 0; i < this.controlPoints.length; i++) { 
         point(this.controlPoints[i].x, this.controlPoints[i].y);
       }
@@ -124,8 +132,9 @@ class BezierCurve {
   insideControlPoint(x, y) {
     for(let i = 0; i < this.controlPoints.length; i++) {
       let px = this.controlPoints[i].x, py = this.controlPoints[i].y;
-      let dist = sqrt((px - x)*(px - x) + (py - y)*(py - y));
-      if (dist <= dotsize) {
+
+      let d = dist(px.x, px.y, py.x, py.y);
+      if (d <= DOT_SIZE) {
         return i;
       }
     }
