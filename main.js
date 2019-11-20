@@ -6,6 +6,10 @@ const DOT_SIZE = 10; // ver algum valor bom
 // ================ GLOBAL VARIABLES ================
 
 let bezierCurves;
+let showControlPoints = true;
+let showControlPolygonal = false;
+let showCurves = true;
+let howManyPoints = 100;
 
 // ================ GENERAL FUNCTIONS ================
 
@@ -45,20 +49,16 @@ function mousePressed() {
 // ================ CLASSES OBJECTS ================
 
 class BezierCurve {
-  constructor(controlPoints, howManyPoints = 100) {
+  constructor(controlPoints) {
     this.controlPoints = controlPoints;
-    this.howManyPoints = howManyPoints
-    this.curvePoints = this.computePoints(this.howManyPoints);
-    this.showControlPoints = true;
-    this.showControlPolygonal = false;
-    this.showCurves = true;
+    this.curvePoints = this.computePoints(howManyPoints);
   }
 
   // custom functions of the class here
   display() {
     this.setCurve();
 
-    if(this.showControlPoints) {
+    if(showControlPoints) {
       stroke('green');
       strokeWeight(DOT_SIZE);
       for(let i = 0; i < this.controlPoints.length; i++) { 
@@ -66,7 +66,7 @@ class BezierCurve {
       }
     }
 
-    if(this.showControlPolygonal) {
+    if(showControlPolygonal) {
       stroke('red');
       strokeWeight(1);
       for(let i = 1; i < this.controlPoints.length; i++) {
@@ -74,7 +74,7 @@ class BezierCurve {
       }
     }
 
-    if(this.showCurves) {
+    if(showCurves) {
       stroke('black');
       strokeWeight(1);
       for(let i = 1; i < this.curvePoints.length; i++) {
@@ -98,15 +98,15 @@ class BezierCurve {
     }
   }
 
-  computePoints(howManyPoints) {
-    howManyPoints--;
+  computePoints(numPoints) {
+    numPoints--;
     let points = [];
-    let delta = 1.0/howManyPoints;
+    let delta = 1.0/numPoints;
     let t = delta;
     points.push(this.controlPoints[0]);
-    for(let i = 1; i < howManyPoints; i++) {
+    for(let i = 1; i < numPoints; i++) {
       points.push(this.deCastejau(this.controlPoints, t));
-      t += delta; 
+      t += delta;
     }
     points.push(this.controlPoints[this.controlPoints.length-1]);
     return points;
@@ -124,12 +124,8 @@ class BezierCurve {
     this.showControlPolygonal = value;
   }
 
-  setHowManyPoits(value) {
-    this.howManyPoints = value;
-  }
-
   setCurve() {
-    this.curvePoints = this.computePoints(this.howManyPoints);
+    this.curvePoints = this.computePoints(howManyPoints);
   }
 
   insideControlPoint(x, y) {
