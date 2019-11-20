@@ -3,6 +3,10 @@
 const AUTHORS = "Tiago Moraes & Vinícius Dantas";
 const DOT_SIZE = 10; // ver algum valor bom
 
+// ================ GLOBAL VARIABLES ================
+
+let bezierCurves;
+
 // ================ GENERAL FUNCTIONS ================
 
 // add more functions here
@@ -10,33 +14,31 @@ const DOT_SIZE = 10; // ver algum valor bom
 // ================ SETUP & DRAW ================
 
 function setup() {
-  // add setup code before the createCanvas()
   createCanvas(1920, 1080);
+  bezierCurves = [];
+  let points = [{x: 200, y:200},
+    {x: 100, y:500},
+    {x:200, y:500},
+    {x:260, y:800},
+    {x:800, y:680},
+    {x:460, y:400}
+  ];
+  bezierCurves.push(new BezierCurve(points));
 }
 
 function draw() {
   // call drawing functions here
-  let points = [{x: 200, y:200},
-                {x: 100, y:500},
-                {x:200, y:500},
-                {x:260, y:800}];
-  let bc = new BezierCurve(points);
-  bc.setPolygonalFlag(true);
-  bc.addPoint(2, 500,400);
-  bc.addPoint(2, 2,2);
-  bc.updatePoint(3, 800, 800);
-  bc.removePoint(bc.insideControlPoint(4, 4));
-  bc.updatePoint(3, 1000, 500 );
-  bc.setCurve();
-  bc.display();
+  bezierCurves[0].display();
 
   //console.log(bc.insideControlPoint(1000, 1000));
 }
 
-function mousePressed(e) {
-  let index = bc.insideControlPoint(e.clientX, e.clientY);
+function mousePressed() {
+  let index = bezierCurves[0].insideControlPoint(mouseX, mouseY);
+  console.log(bezierCurves[0].controlPoints);
   if(index) {
-    bc.updatePoint(index, 100, 200);
+    bezierCurves[0].updatePoint(index, 100, 200);
+    bezierCurves[0].display();
   }
 }
 
@@ -54,7 +56,8 @@ class BezierCurve {
 
   // custom functions of the class here
   display() {
-    
+    this.setCurve();
+
     if(this.showControlPoints) {
       stroke('green');
       strokeWeight(DOT_SIZE);
@@ -131,9 +134,10 @@ class BezierCurve {
 
   insideControlPoint(x, y) {
     for(let i = 0; i < this.controlPoints.length; i++) {
-      let px = this.controlPoints[i].x, py = this.controlPoints[i].y;
+      let px = this.controlPoints[i].x;
+      let py = this.controlPoints[i].y;
 
-      let d = dist(px.x, px.y, py.x, py.y);
+      let d = dist(px, py, x, y);
       if (d <= DOT_SIZE) {
         return i;
       }
@@ -141,8 +145,8 @@ class BezierCurve {
     return null;
   }
 
-  addPoint(pos, x, y) {
-    this.controlPoints.splice(pos, 0, {x: x, y: y});
+  addPoint(x, y) {
+    this.controlPoints.push({x: x, y: y});
   }
 
   updatePoint(pos, x, y) {
