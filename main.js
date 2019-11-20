@@ -47,6 +47,14 @@ function displayAllCurves() {
   }
 }
 
+function setAllCurves() {
+  if(bezierCurves) {
+    bezierCurves.forEach((e) => {
+      e.setCurve();
+    });
+  }
+}
+
 function getCurvePoint(curveIndex, x, y) {
 
   /*
@@ -152,6 +160,7 @@ function deleteCurvePressed() {
 
 function changedResolution() {
   howManyPoints = curveResolutionInput.value();
+  setAllCurves();
 }
 
 function handleControlPointsClick() {
@@ -345,7 +354,7 @@ class BezierCurve {
     if(this.controlPoints) {
       numPoints--;
       let points = [];
-      if (this.controlPoints.length === 0) {
+      if (this.controlPoints.length == 0) {
         return points;
       } 
       let delta = 1.0/numPoints;
