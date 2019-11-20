@@ -3,9 +3,11 @@
 const AUTHORS = "Tiago Moraes & Vinícius Dantas";
 const DOT_SIZE = 15; // ver algum valor bom
 const toast = new Toasty();
+const DOT_MAX_AMT = 1000;
 
 // ================ GLOBAL VARIABLES ================
 
+let matrix = [];
 let bezierCurves = [];
 let showControlPoints = true;
 let showControlPolygonal = true;
@@ -45,6 +47,14 @@ function displayAllCurves() {
   }
 }
 
+function setAllCurves() {
+  if(bezierCurves) {
+    bezierCurves.forEach((e) => {
+      e.setCurve();
+    });
+  }
+}
+
 function getCurvePoint(curveIndex, x, y) {
 
   /*
@@ -77,7 +87,7 @@ function addNewCurve() {
   bezierCurves.push(tempCurve);
 
   // succes creation alert
-  toast.success(`Curva ${bezierCurves.length - 1} cirada com sucesso!`);
+  toast.success(`Curva ${bezierCurves.length - 1} criada com sucesso!`);
 
   atualizeCurveSelector();
 }
@@ -150,6 +160,7 @@ function deleteCurvePressed() {
 
 function changedResolution() {
   howManyPoints = curveResolutionInput.value();
+  setAllCurves();
 }
 
 function handleControlPointsClick() {
@@ -216,6 +227,14 @@ function setup() {
   let canvas = createCanvas(width, height);
   canvas.parent('canvas-container');
   canvas.mousePressed(canvasMousePressed);
+
+  // initializing calc matrix
+  for(let i = 0; i < DOT_MAX_AMT; i++) {
+    matrix[i] = [];
+    for(let j = 0; j < DOT_MAX_AMT; j++) {
+      matrix[i][j] = {x: 0, y: 0};
+    }
+  }
 }
 
 function draw() {
@@ -298,7 +317,24 @@ class BezierCurve {
     }
   }
 
-  deCastejau(points, t) {
+  deCastejauIterative(t) { 
+
+    for(let i = 0; i < this.controlPoints.length; i++) {
+      matrix[0][i].x = this.controlPoints[i].x;
+      matrix[0][i].y = this.controlPoints[i].y;
+    }
+    for(let i = 1; i < this.controlPoints.length; i++) {
+      for(let j = 0; j < this.controlPoints.length-i; j++) {
+        matrix[i][j].x = (1-t)*matrix[i-1][j].x + t*matrix[i-1][j+1].x;
+        matrix[i][j].y = (1-t)*matrix[i-1][j].y + t*matrix[i-1][j+1].y;
+      }
+    }
+    return {x: matrix[this.controlPoints.length-1][0].x, y: matrix[this.controlPoints.length-1][0].y};
+
+  }
+
+  deCastejauRecursive(points, t) {
+
     if (points.length > 1) {
       let nextPoints = [];
       for(let i = 0; i < points.length-1; i++) {
@@ -307,24 +343,25 @@ class BezierCurve {
           y: (1-t)*points[i].y + t*points[i+1].y
         });
       }
-      return this.deCastejau(nextPoints, t);
+      return this.deCastejauRecursive(nextPoints, t);
     } else {
       return points[0];
     }
+
   }
 
   computePoints(numPoints) {
     if(this.controlPoints) {
       numPoints--;
       let points = [];
-      if (this.controlPoints.length === 0) {
+      if (this.controlPoints.length == 0) {
         return points;
       } 
       let delta = 1.0/numPoints;
       let t = delta;
       points.push(this.controlPoints[0]);
       for(let i = 1; i < numPoints; i++) {
-        points.push(this.deCastejau(this.controlPoints, t));
+        points.push(this.deCastejauIterative(t));
         t += delta;
       }
       points.push(this.controlPoints[this.controlPoints.length-1]);
@@ -332,18 +369,6 @@ class BezierCurve {
     }
 
     return null;
-  }
-
-  setCurveFlag(value) {
-    this.showCurves = value;
-  }
-
-  setPointsFlag(value) {
-    this.showControlPoints = value;
-  }
-
-  setPolygonalFlag(value) {
-    this.showControlPolygonal = value;
   }
 
   setCurve() {
