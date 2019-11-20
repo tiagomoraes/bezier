@@ -1,0 +1,56 @@
+.flex-container {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.form-container {
+  width: 20%;
+  min-height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.form-box {
+  width: 90%;
+  margin-top: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvas-container {
+  width: 100%;
+  min-height: 100%;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#curve-select {
+  width: 150px;
+  margin-bottom: 10px;
+}
+
+.curve-button {
+  margin-top: 20px;
+  width: fit-content;
+}
+
+#curve-resolution {
+  width: 150px;
+}

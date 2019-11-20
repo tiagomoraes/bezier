@@ -7,11 +7,72 @@
   <title>Document</title>
   <link rel="stylesheet" href="lib/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="lib/toasty.css">
 </head>
 <body>
+  <div class="flex-container">
+    <div class="form-container">
+      <div class="form-box">
+        <h2>Curvas de Bezier</h2>
+        <hr>
+        <h6>by vdj & tbm2</h6>
+        <div class="form-group">
+          <button type="button" class="btn btn-primary curve-button" id="add-curve">
+            <span class="glyphicon glyphicon-plus"></span>
+            Adicionar Curva
+          </button>
+        </div>
+        <div class="form-group">
+          <label for="curve-resolution">Selecione a Curva</label>
+          <select class="custom-select" id="curve-select">
+            <option value="none" disabled selected>Selecione</option>
+          </select>
+          <div class="" id="form-radios">
+            <div class="custom-control custom-radio">
+              <input type="radio" value="add" class="custom-control-input" name="curve-functions" id="add-points" checked>
+              <label class="custom-control-label" for="add-points">Adicionar Pontos</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" value="move" class="custom-control-input" name="curve-functions" id="move-points">
+              <label class="custom-control-label" for="move-points">Mover Pontos</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" value="delete" class="custom-control-input" name="curve-functions" id="delete-points">
+              <label class="custom-control-label" for="delete-points">Deletar Pontos</label>
+            </div>
+          </div>
+          <button type="button" class="btn btn-danger curve-button" id="delete-curve">Remover Curva</button>
+        </div>
+        <br>
+        <div class="form-group">
+          <label for="curve-resolution">Avaliações</label>
+          <input type="number" class="form-control" id="curve-resolution">
+          <button type="button" class="btn btn-secondary curve-button" id="set-curve-resolution">Set</button>
+        </div>
+        <br>
+        <span>Flags</span>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="control-points" checked>
+          <label class="custom-control-label" for="control-points">Pontos de Controle</label>
+        </div>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="control-polygon" checked>
+          <label class="custom-control-label" for="control-polygon">Poligonais de Controle</label>
+        </div>
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="curves" checked>
+          <label class="custom-control-label" for="curves">Curvas</label>
+        </div>
+        <br>
+        <button type="button" class="btn curve-button" id="reset">Resetar</button>
+      </div>
+    </div>
+    <div class="canvas-container" id="canvas-container"></div>
+  </div>
   <script src="lib/p5.min.js"></script>
   <script src="lib/jquery-3.4.1.min.js"></script>
   <script src="lib/bootstrap.min.js"></script>
+  <script src="lib/toasty.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

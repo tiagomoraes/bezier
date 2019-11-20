@@ -1,84 +1,297 @@
 // ================ CONSTANTS ================
 
 const AUTHORS = "Tiago Moraes & Vinícius Dantas";
-const DOT_SIZE = 10; // ver algum valor bom
+const DOT_SIZE = 15; // ver algum valor bom
+const toast = new Toasty();
 
 // ================ GLOBAL VARIABLES ================
 
-let bezierCurves;
+let bezierCurves = [];
 let showControlPoints = true;
-let showControlPolygonal = false;
+let showControlPolygonal = true;
 let showCurves = true;
 let howManyPoints = 100;
+let dragging = false;
+let draggingIndex = null;
+let selectedCurve = null;
+let selectedFunction = 'add';
+
+
+let addCurveBtn;
+let selectCurveSel;
+let deleteCurveBtn;
+let curveResolutionInput;
+let controlPointsFlag;
+let controlPolygonFlag;
+let curvesFlag;
+let setCurveResolution;
+let resetBtn;
 
 // ================ GENERAL FUNCTIONS ================
 
-// add more functions here
+// jQuery functions
+$(document).ready(() => {
+  $('input[name=curve-functions]').click(() => {
+    selectedFunction = $('input[name=curve-functions]:checked').val();
+  });
+});
+
+function displayAllCurves() {
+  if(bezierCurves) {
+    clear();
+    bezierCurves.forEach((e, index) => {
+      e.display(index);
+    });
+  }
+}
+
+function getCurvePoint(curveIndex, x, y) {
+
+  /*
+  Get the clicked point index on that curve. 
+  If there is no point there, returns null
+  */
+
+  if(bezierCurves) {
+    let currentBezier = bezierCurves[curveIndex];
+
+    for(let i = 0; i < currentBezier.controlPoints.length; i++) {
+      let px = currentBezier.controlPoints[i].x;
+      let py = currentBezier.controlPoints[i].y;
+  
+      let d = dist(px, py, x, y);
+      if (d <= DOT_SIZE) {
+
+        // returns the curve index and point index
+        return i;
+      }
+    }
+  
+  }
+
+  return null;
+}
+
+function addNewCurve() {
+  let tempCurve = new BezierCurve();
+  bezierCurves.push(tempCurve);
+
+  // succes creation alert
+  toast.success(`Curva ${bezierCurves.length - 1} cirada com sucesso!`);
+
+  atualizeCurveSelector();
+}
+
+function selectChanged() {
+  selectedCurve = selectCurveSel.value();
+}
+
+function atualizeCurveSelector() {
+  // atualize curve selector
+
+  let curveSelector = $('#curve-select');
+  curveSelector.html('');
+  for(let i = 0; i < bezierCurves.length; i++) {
+    if(i === bezierCurves.length -1) {
+      curveSelector.append(`
+        <option value="${i}" selected>${i}</option>
+      `);
+    } else {
+      curveSelector.append(`
+        <option value="${i}">${i}</option>
+      `);
+    }
+    
+  }
+  
+  if(bezierCurves) {
+    selectedCurve = bezierCurves.length - 1;
+  }
+
+}
+
+function canvasMousePressed() {
+  if(bezierCurves && bezierCurves.length) {
+    if(selectedFunction === 'add') {
+      // add
+      bezierCurves[selectedCurve].addPoint(mouseX, mouseY);
+
+    } else if(selectedFunction === 'move') {
+      // move
+      let index = getCurvePoint(selectedCurve, mouseX, mouseY);
+
+      if(! (bezierCurves[selectedCurve].controlPoints && bezierCurves[selectedCurve].controlPoints.length)) {
+        toast.error('Crie pontos de controle antes de movê-los!');
+      }
+
+      if(index !== null) {
+        dragging = true;
+        draggingIndex = index;
+      }
+
+
+    } else {
+      // delete
+      let index = getCurvePoint(selectedCurve, mouseX, mouseY);
+      if(index !== null) {
+        bezierCurves[selectedCurve].removePoint(index);
+      }
+    }
+  } else {
+    toast.error('Não há curvas cadastradas!');
+  }
+}
+
+function deleteCurvePressed() {
+  bezierCurves.splice(selectedCurve, 1);
+  atualizeCurveSelector();
+}
+
+function changedResolution() {
+  howManyPoints = curveResolutionInput.value();
+}
+
+function handleControlPointsClick() {
+  if(this.checked()) {
+    showControlPoints = true;
+  } else {
+    showControlPoints = false;
+  }
+}
+
+function handleControlPolygonalClick() {
+  if(this.checked()) {
+    showControlPolygonal = true;
+  } else {
+    showControlPolygonal = false;
+  }
+}
+
+function handleCurvesClick() {
+  if(this.checked()) {
+    showCurves = true;
+  } else {
+    showCurves = false;
+  }
+}
+
+function reset() {
+  bezierCurves = [];
+  atualizeCurveSelector();
+  displayAllCurves();
+}
 
 // ================ SETUP & DRAW ================
 
 function setup() {
-  createCanvas(1920, 1080);
-  bezierCurves = [];
-  let points = [{x: 200, y:200},
-    {x: 100, y:500},
-    {x:200, y:500},
-    {x:260, y:800},
-    {x:800, y:680},
-    {x:460, y:400}
-  ];
-  bezierCurves.push(new BezierCurve(points));
+
+  // linkando inputs com HTML
+  addCurveBtn = select('#add-curve');
+  selectCurveSel = select('#curve-select');
+  deleteCurveBtn = select('#delete-curve');
+  curveResolutionInput = select('#curve-resolution');
+  setCurveResolution = select('#set-curve-resolution');
+  controlPointsFlag = select('#control-points');
+  controlPolygonFlag = select('#control-polygon');
+  curvesFlag = select('#curves');
+  resetBtn = select('#reset');
+
+  curveResolutionInput.value(howManyPoints);
+
+  // listeners
+  addCurveBtn.mousePressed(addNewCurve);
+  selectCurveSel.changed(selectChanged);
+  deleteCurveBtn.mousePressed(deleteCurvePressed);
+  setCurveResolution.mousePressed(changedResolution);
+  controlPointsFlag.changed(handleControlPointsClick);
+  controlPolygonFlag.changed(handleControlPolygonalClick);
+  curvesFlag.changed(handleCurvesClick);
+  resetBtn.mousePressed(reset);
+  
+  // set canvas based on div width and height
+  let canvasContainerDiv = $('#canvas-container');
+  let height = canvasContainerDiv.innerHeight();
+  let width = canvasContainerDiv.innerWidth();
+  let canvas = createCanvas(width, height);
+  canvas.parent('canvas-container');
+  canvas.mousePressed(canvasMousePressed);
 }
 
 function draw() {
+
   // call drawing functions here
-  bezierCurves[0].display();
+  
+  if(dragging) {
+    let c = selectedCurve;
+    let i = draggingIndex;
+
+    bezierCurves[c].updatePoint(i, mouseX, mouseY);
+  }
+
+  displayAllCurves();
 
   //console.log(bc.insideControlPoint(1000, 1000));
 }
 
-function mousePressed() {
-  let index = bezierCurves[0].insideControlPoint(mouseX, mouseY);
-  console.log(bezierCurves[0].controlPoints);
-  if(index) {
-    bezierCurves[0].updatePoint(index, 100, 200);
-    bezierCurves[0].display();
+function mouseReleased() {
+  if(dragging) {
+    dragging = false;
+    draggingCurve = null;
+    draggingIndex = null;
   }
+}
+
+function keyPressed() {
+
 }
 
 // ================ CLASSES OBJECTS ================
 
 class BezierCurve {
   constructor(controlPoints) {
-    this.controlPoints = controlPoints;
+    this.controlPoints = [];
+    if(controlPoints) {
+      this.controlPoints = controlPoints;
+    }
+
     this.curvePoints = this.computePoints(howManyPoints);
   }
 
   // custom functions of the class here
-  display() {
+  display(index) {
     this.setCurve();
 
-    if(showControlPoints) {
-      stroke('green');
-      strokeWeight(DOT_SIZE);
-      for(let i = 0; i < this.controlPoints.length; i++) { 
-        point(this.controlPoints[i].x, this.controlPoints[i].y);
+    if(this.controlPoints && this.controlPoints.length) { // only if there are control points
+      if(showControlPoints) {
+        if(index == selectedCurve) {
+          stroke('green');
+        } else {
+          stroke('gray');
+        }
+        strokeWeight(DOT_SIZE);
+        for(let i = 0; i < this.controlPoints.length; i++) { 
+          point(this.controlPoints[i].x, this.controlPoints[i].y);
+        }
       }
-    }
-
-    if(showControlPolygonal) {
-      stroke('red');
-      strokeWeight(1);
-      for(let i = 1; i < this.controlPoints.length; i++) {
-        line(this.controlPoints[i].x, this.controlPoints[i].y, this.controlPoints[i-1].x, this.controlPoints[i-1].y);
+  
+      if(showControlPolygonal) {
+        if(index == selectedCurve) {
+          stroke('red');
+        } else {
+          stroke('gray');
+        }
+        strokeWeight(1);
+        for(let i = 1; i < this.controlPoints.length; i++) {
+          line(this.controlPoints[i].x, this.controlPoints[i].y, this.controlPoints[i-1].x, this.controlPoints[i-1].y);
+        }
       }
-    }
-
-    if(showCurves) {
-      stroke('black');
-      strokeWeight(1);
-      for(let i = 1; i < this.curvePoints.length; i++) {
-        line(this.curvePoints[i].x, this.curvePoints[i].y, this.curvePoints[i-1].x, this.curvePoints[i-1].y);
+  
+      if(showCurves) {
+        stroke('black');
+        strokeWeight(1);
+        for(let i = 1; i < this.curvePoints.length; i++) {
+          line(this.curvePoints[i].x, this.curvePoints[i].y, this.curvePoints[i-1].x, this.curvePoints[i-1].y);
+        }
       }
     }
   }
@@ -99,17 +312,21 @@ class BezierCurve {
   }
 
   computePoints(numPoints) {
-    numPoints--;
-    let points = [];
-    let delta = 1.0/numPoints;
-    let t = delta;
-    points.push(this.controlPoints[0]);
-    for(let i = 1; i < numPoints; i++) {
-      points.push(this.deCastejau(this.controlPoints, t));
-      t += delta;
+    if(this.controlPoints) {
+      numPoints--;
+      let points = [];
+      let delta = 1.0/numPoints;
+      let t = delta;
+      points.push(this.controlPoints[0]);
+      for(let i = 1; i < numPoints; i++) {
+        points.push(this.deCastejau(this.controlPoints, t));
+        t += delta;
+      }
+      points.push(this.controlPoints[this.controlPoints.length-1]);
+      return points;
     }
-    points.push(this.controlPoints[this.controlPoints.length-1]);
-    return points;
+
+    return null;
   }
 
   setCurveFlag(value) {
@@ -128,25 +345,18 @@ class BezierCurve {
     this.curvePoints = this.computePoints(howManyPoints);
   }
 
-  insideControlPoint(x, y) {
-    for(let i = 0; i < this.controlPoints.length; i++) {
-      let px = this.controlPoints[i].x;
-      let py = this.controlPoints[i].y;
-
-      let d = dist(px, py, x, y);
-      if (d <= DOT_SIZE) {
-        return i;
-      }
-    }
-    return null;
-  }
-
   addPoint(x, y) {
     this.controlPoints.push({x: x, y: y});
+    return 1;
   }
 
   updatePoint(pos, x, y) {
-    this.controlPoints[pos] = {x: x, y: y};
+    if(this.controlPoints && this.controlPoints[pos]) {
+      this.controlPoints[pos] = {x: x, y: y};
+      return 1;
+    }
+
+    return 0;
   }
 
   removePoint(pos) {
