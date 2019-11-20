@@ -115,7 +115,7 @@ function canvasMousePressed() {
     if(selectedFunction === 'add') {
       // add
       bezierCurves[selectedCurve].addPoint(mouseX, mouseY);
-
+      bezierCurves[selectedCurve].setCurve();
     } else if(selectedFunction === 'move') {
       // move
       let index = getCurvePoint(selectedCurve, mouseX, mouseY);
@@ -135,6 +135,7 @@ function canvasMousePressed() {
       let index = getCurvePoint(selectedCurve, mouseX, mouseY);
       if(index !== null) {
         bezierCurves[selectedCurve].removePoint(index);
+        bezierCurves[selectedCurve].setCurve();
       }
     }
   } else {
@@ -226,6 +227,7 @@ function draw() {
     let i = draggingIndex;
 
     bezierCurves[c].updatePoint(i, mouseX, mouseY);
+    bezierCurves[c].setCurve();
   }
 
   displayAllCurves();
@@ -259,7 +261,7 @@ class BezierCurve {
 
   // custom functions of the class here
   display(index) {
-    this.setCurve();
+    //this.setCurve();
 
     if(this.controlPoints && this.controlPoints.length) { // only if there are control points
       if(showControlPoints) {
@@ -315,6 +317,9 @@ class BezierCurve {
     if(this.controlPoints) {
       numPoints--;
       let points = [];
+      if (this.controlPoints.length === 0) {
+        return points;
+      } 
       let delta = 1.0/numPoints;
       let t = delta;
       points.push(this.controlPoints[0]);
