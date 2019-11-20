@@ -87,7 +87,7 @@ function addNewCurve() {
   bezierCurves.push(tempCurve);
 
   // succes creation alert
-  toast.success(`Curva ${bezierCurves.length - 1} cirada com sucesso!`);
+  toast.success(`Curva ${bezierCurves.length - 1} criada com sucesso!`);
 
   atualizeCurveSelector();
 }
